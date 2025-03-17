@@ -1,0 +1,156 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class Account {
+public:
+    int accountNumber;
+    string name;
+    double balance;
+
+    Account(int accNum, string accName, double initialDeposit) {
+        accountNumber = accNum;
+        name = accName;
+        balance = initialDeposit;
+    }
+
+    void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+            cout << "Deposit succesfull! New balance: " << balance << endl;
+        } else {
+            cout << "Invalid amount!" << endl;
+        }
+    }
+
+    void withdraw(double amount) {
+        if (amount > 0 && amount <= balance) {
+            balance -= amount;
+            cout << "Withdraw succesfull! New balance: " << balance << endl;
+        } else {
+            cout << "Invalid amount or insuficient funds!" << endl;
+        }
+    }
+
+    void displayInfo() {
+        cout << "Account Number: " << accountNumber << " | Name: " << name << " | Balance: " << balance << endl;
+    }
+};
+
+class Bank {
+public:
+    vector<Account> accounts;
+    int nextAccountNumber = 1001;
+
+    void createAccount() {
+        string name;
+        double initialDeposit;
+        cout << "Enter name: ";
+        cin >> name;
+        cout << "Enter initial deposit: ";
+        cin >> initialDeposit;
+        
+        Account newAccount(nextAccountNumber++, name, initialDeposit);
+        accounts.push_back(newAccount);
+        cout << "Account created succesfully! Your account number is " << newAccount.accountNumber << endl;
+    }
+
+    Account* findAccount(int accNum) {
+        for (auto &acc : accounts) {
+            if (acc.accountNumber == accNum) {
+                return &acc;
+            }
+        }
+        return nullptr; // No found
+    }
+
+    void transfer(int fromAcc, int toAcc, double amount) {
+        Account* sender = findAccount(fromAcc);
+        Account* receiver = findAccount(toAcc);
+
+        if (sender && receiver) {
+            if (sender->balance >= amount) {
+                sender->withdraw(amount);
+                receiver->deposit(amount);
+                cout << "Transfer succesfull!" << endl;
+            } else {
+                cout << "Insuficient funds for transfer!" << endl;
+            }
+        } else {
+            cout << "One or both accounts not found!" << endl;
+        }
+    }
+
+    void showMenu() {
+        while (true) {
+            cout << "\n1. Create Account";
+            cout << "\n2. Deposit";
+            cout << "\n3. Withdraw";
+            cout << "\n4. Transfer";
+            cout << "\n5. Display Account Info";
+            cout << "\n6. Exit";
+            cout << "\nChoose an option: ";
+            
+            int choice, accNum, toAcc;
+            double amount;
+            cin >> choice;
+            
+            switch (choice) {
+                case 1:
+                    createAccount();
+                    break;
+                case 2:
+                    cout << "Enter account number: ";
+                    cin >> accNum;
+                    cout << "Enter deposit amount: ";
+                    cin >> amount;
+                    if (Account* acc = findAccount(accNum)) {
+                        acc->deposit(amount);
+                    } else {
+                        cout << "Account not found!" << endl;
+                    }
+                    break;
+                case 3:
+                    cout << "Enter account number: ";
+                    cin >> accNum;
+                    cout << "Enter withdraw amount: ";
+                    cin >> amount;
+                    if (Account* acc = findAccount(accNum)) {
+                        acc->withdraw(amount);
+                    } else {
+                        cout << "Account not found!" << endl;
+                    }
+                    break;
+                case 4:
+                    cout << "Enter sender account number: ";
+                    cin >> accNum;
+                    cout << "Enter receiver account number: ";
+                    cin >> toAcc;
+                    cout << "Enter transfer amount: ";
+                    cin >> amount;
+                    transfer(accNum, toAcc, amount);
+                    break;
+                case 5:
+                    cout << "Enter account number: ";
+                    cin >> accNum;
+                    if (Account* acc = findAccount(accNum)) {
+                        acc->displayInfo();
+                    } else {
+                        cout << "Account not found!" << endl;
+                    }
+                    break;
+                case 6:
+                    cout << "Exiting..." << endl;
+                    return;
+                default:
+                    cout << "Invalid option! Try again." << endl;
+            }
+        }
+    }
+};
+
+int main() {
+    Bank bank;
+    bank.showMenu();
+    return 0;
+}
